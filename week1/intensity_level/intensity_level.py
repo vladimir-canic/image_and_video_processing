@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 
 
+
 def check_intensity_level(level):
 	""" 
 	Intensity level must in [2, 128], and must be power of number two.
@@ -75,7 +76,32 @@ def intensity_level(image, level):
 
 
 def main():
-	pass
+	"""
+	This function represents the main function for 
+	testing the code for changing intesnity level of an image.
+
+	"""
+
+	####################################################
+	# Example 1                                        #
+	####################################################
+	test_example_image = np.array([
+			[234, 214, 217], 
+			[123, 147, 186], 
+			[65 , 87 , 15 ]
+		])
+	test_example_level = 8
+
+	print(intensity_level(test_example_image, test_example_level))
+	
+
+	####################################################
+	# Example 2                                        #
+	####################################################
+	test_example_image = "./data/image001.jpg"
+	test_example_level = 8
+
+	print(intensity_level(test_example_image, test_example_level))
 
 
 if __name__ == "__main__":
