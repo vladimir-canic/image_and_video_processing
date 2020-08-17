@@ -43,6 +43,7 @@ def intensity_level(image, level):
 	Raises:
 		ValueError: If intensity level doesn't have correct value.
 		TypeError: If input image doesn't have correct type.
+		IOError: If opencv library doesn't read image file successfully.
 
 	Examples:
 		>>> intensity_level(np.array([[234, 52], [12, 147]]), 64)
@@ -56,6 +57,8 @@ def intensity_level(image, level):
 	# Read image
 	if type(image) == str:
 		img = cv2.imread(image)
+		if type(img) != np.ndarray:
+			raise IOError("Image isn't read successfully. ")
 	elif type(image) == np.ndarray:
 		img = image
 	else:
@@ -63,8 +66,7 @@ def intensity_level(image, level):
 						"Or numpy n-dimensional array. ")
 
 	# Change Intensity Level
-	img /= (256 / level)
-	img = img.astype(np.int8)
+	img //= (256 // level)
 
 	# Write image
 	if type(image) == str:
@@ -92,16 +94,20 @@ def main():
 		])
 	test_example_level = 8
 
+	print("Example 1")
 	print(intensity_level(test_example_image, test_example_level))
-	
+	print("\n")
+
 
 	####################################################
 	# Example 2                                        #
 	####################################################
-	test_example_image = "./data/image001.jpg"
+	test_example_image = "./data/image001.jpeg"
 	test_example_level = 8
 
+	print("Example 2")
 	print(intensity_level(test_example_image, test_example_level))
+	print("\n")
 
 
 if __name__ == "__main__":
