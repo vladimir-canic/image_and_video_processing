@@ -70,8 +70,10 @@ def intensity_level(image, level):
 
 	# Write image
 	if type(image) == str:
-		name, extension = image.split('.')
-		cv2.imwrite(name + "_out." + extension, img)
+		path_segments = image.split('/')
+		name, extension = path_segments[-1].split('.')
+		output = '/'.join(path_segments[:-1]) + '/' + name + "_out." + extension
+		cv2.imwrite(output, img)
 		return True	
 	
 	return img
