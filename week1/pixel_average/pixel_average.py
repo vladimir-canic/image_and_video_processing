@@ -2,7 +2,13 @@ import numpy as np
 import cv2
 
 
-def pixel_average_naive(image, neighborhood, padtype):
+def pad_with(vector, pad_width, iaxis, kwargs):
+    pad_value = kwargs.get('padder', 10)
+    vector[:pad_width[0]] = pad_value
+    vector[-pad_width[1]:] = pad_value
+
+
+def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant', padder=None):
 
 	"""
 	This function computer average value for around each pixel in an image.
@@ -12,6 +18,8 @@ def pixel_average_naive(image, neighborhood, padtype):
 		image (str, numpy.ndarray):
 		neighborhood (int): 
 		padtype (str): 
+		mode (str, func): 
+		padder (int):
 
 	Returns:
 		img_out (numpy.ndarray):
@@ -71,9 +79,12 @@ def pixel_average_naive(image, neighborhood, padtype):
 	# Averaging window size is odd.
 	else:
 		left, right, top, bottom = bigger, bigger, bigger, bigger
-		
-	padding = [[left, right], [top, bottom], [0, 0]]
-	pad_img = np.pad(img, padding)
+
+	padding = [[top, bottom], [left, right], [0, 0]]
+	if padder is not None:
+		pad_img = np.pad(img, padding, mode)
+	else:
+		pad_img = np.pad(img, padding, pad_with, padder=padder)
 
 	# Compute neighborhood average and store into the output image
 	for channel in range(pad_img.shape[2]):
