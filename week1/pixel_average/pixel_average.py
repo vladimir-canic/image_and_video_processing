@@ -1,8 +1,22 @@
+import time
+
 import numpy as np 
 import cv2
 
 
 def pad_with(vector, pad_width, iaxis, kwargs):
+	"""
+	This function pads a given vector with a given value.
+
+	Args:
+		vector(numpy.ndarray): Input vector.
+		pad_width (numpy.ndarray): Padding width.
+		iaxis (int): Axis for what we pad given vector.
+		padder (int): Padding value.
+
+	Returns
+		-
+	"""
     pad_value = kwargs.get('padder', 10)
     vector[:pad_width[0]] = pad_value
     vector[-pad_width[1]:] = pad_value
@@ -37,13 +51,30 @@ def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant'
 	Examples:
 		>>> img = np.array([[232, 67, 155], [23, 74, 198], [247, 85, 112]])
 		>>> img
-		array([[232,  67, 155],
-		       [ 23,  74, 198],
-		       [247,  85, 112]])
+		array([[[232],
+		        [ 67],
+		        [155]],
+
+		       [[ 23],
+		        [ 74],
+		        [198]],
+
+		       [[247],
+		        [ 85],
+		        [112]]])
+
 		>>> pixel_average_naive(img, 3)
-		[[44, 83, 54], 
-		 [80, 132, 76], 
-		 [47, 82, 52]]
+		array([[[ 44],
+		        [ 83],
+		        [ 54]],
+
+		       [[ 80],
+		        [132],
+		        [ 76]],
+
+		       [[ 47],
+		        [ 82],
+		        [ 52]]])
 
 	"""
 	
@@ -90,10 +121,14 @@ def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant'
 		left, right, top, bottom = bigger, bigger, bigger, bigger
 
 	padding = [[top, bottom], [left, right], [0, 0]]
-	if padder is not None:
+	if padder is None:
 		pad_img = np.pad(img, padding, mode)
 	else:
-		pad_img = np.pad(img, padding, pad_with, padder=padder)
+		channels = []
+		for i in range(img.shape[2]):
+			channel = np.pad(img[:, :, i], padding[:-1], pad_with, padder=padder)
+			channels.append(channel.reshape(channel.shape[0], channel.shape[1], 1))
+		pad_img = np.concatenate(channels, 2)
 
 	# Compute neighborhood average and store into the output image
 	for channel in range(pad_img.shape[2]):
@@ -102,12 +137,12 @@ def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant'
 				img_out[height, width, channel] = np.mean(pad_img[height:height + neighborhood, 
 																  width:width + neighborhood, 
 																  channel]).astype(np.uint8)
-	if type(image) == str::
-        path_segments = image.split('/')
-        name, extension = path_segments[-1].split('.')
-        output = '/'.join(path_segments[:-1]) + '/' + name + "_out." + extension
-        cv2.imwrite(output, img)
-        return True
+	if type(image) == str:
+		path_segments = image.split('/')
+		name, extension = path_segments[-1].split('.')
+		output = '/'.join(path_segments[:-1]) + '/' + name + "_out." + extension
+		cv2.imwrite(output, img_out)
+		return True
 
 	return img_out
 
@@ -117,7 +152,60 @@ def pixel_average():
 
 
 def main():
-	pass	
+	
+	####################################################################
+	# Test for fumction Pixel Averaging Naive                          #
+	####################################################################
+
+	# Example 1
+	img = np.array([[232, 67, 155], [23, 74, 198], [247, 85, 112]])
+	img = img.reshape(img.shape[0], img.shape[1], 1)
+	print(pixel_average_naive(img, 3))
+	print("\n")
+
+	# Example 2
+	img = np.array([[232, 67, 155], [23, 74, 198], [247, 85, 112]])
+	img = img.reshape(img.shape[0], img.shape[1], 1)
+	print(pixel_average_naive(img, 4))
+	print("\n")
+
+	# Example 3	
+	img = np.array([[232, 67, 155], [23, 74, 198], [247, 85, 112]])
+	img = img.reshape(img.shape[0], img.shape[1], 1)
+	print(pixel_average_naive(img, 3, padder=20))
+	print("\n")
+
+	# Example 4	
+	image_path = "./data/image001.jpg"
+	start = time.time()
+	print(pixel_average_naive(image_path, 21))
+	end = time.time()
+	print("Execution time:", end - start)
+	print("\n")
+
+	# Example 5	
+	image_path = "./data/image002.jpg"
+	start = time.time()
+	print(pixel_average_naive(image_path, 21, padder=20))
+	end = time.time()
+	print("Execution time:", end - start)
+	print("\n")
+	
+	####################################################################
+	# Test for fumction Pixel Averaging                                #
+	####################################################################
+
+	# Example 1
+
+	# Example 2
+
+	# Example 3
+
+	# Example 4
+
+	# Example 5
+
+	# Example 6
 
 
 if __name__ == "__main__":
