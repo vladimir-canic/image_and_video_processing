@@ -102,8 +102,13 @@ def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant'
 				img_out[height, width, channel] = np.mean(pad_img[height:height + neighborhood, 
 																  width:width + neighborhood, 
 																  channel]).astype(np.uint8)
-	# if type(image) == str:
-	# 	cv2.
+	if type(image) == str::
+        path_segments = image.split('/')
+        name, extension = path_segments[-1].split('.')
+        output = '/'.join(path_segments[:-1]) + '/' + name + "_out." + extension
+        cv2.imwrite(output, img)
+        return True
+
 	return img_out
 
 
