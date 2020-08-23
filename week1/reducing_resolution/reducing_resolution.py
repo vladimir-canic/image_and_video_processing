@@ -18,8 +18,30 @@ def reduce_resolution(image, block):
 	Examples:
 
 	"""	
-	
-	img = image
+
+	################################################################################
+    # Read and check input image                                                   #
+    ################################################################################
+
+    if type(image) == str:
+        img = cv2.imread(image)
+        if type(img) != np.ndarray:
+                raise IOError("Image isn't read successfully.")
+    elif type(image) == np.ndarray:
+        img = image
+    else:
+        raise TypeError("Image type must be string that represents "
+                        "path to the image."
+                        "Or image type must be numpy n-dimensional array.")
+
+    if len(img.shape) == 2:
+            img = img.reshape(-1, 1)
+
+
+    ################################################################################
+    # Reducing Image Resolution                                                    #
+    ################################################################################
+
 	height = img.shape[0]
 	width = img.shape[1]
 	channel = img.shape[2]
@@ -30,7 +52,20 @@ def reduce_resolution(image, block):
 	for i in range(height // block):
 		for j in range(width // block):
 			for k in range(channel):
-				img_out[i, j, k] = brr[i * block:(i + 1) * block, j * block:(j + 1) * block, k]
+				img_out[i, j, k] = brr[i * block:(i + 1) * block, 
+									   j * block:(j + 1) * block, k]
+
+
+	################################################################################
+    # Write and return the output                                                  #
+    ################################################################################
+
+    if type(image) == str:
+        path_segments = image.split('/')
+        name, extension = path_segments[-1].split('.')
+        output = '/'.join(path_segments[:-1]) + '/' + name + 'OpenCV_out.' + extension
+        cv2.imwrite(output, img_out)
+        return True
 
 	return img_out
 
