@@ -7,12 +7,17 @@ def rotate_image(image, angle):
 	Rotate given image for the given angle.
 
 	Args:
+		image(str, numpy.ndarray): Input image given as numpy ndarray or
+								   as string that represents path to the image.
+		angle (int): Angle given in degrees, it is intger in range (-inf, inf).
 
 	Returns:
+		img_out (numpy.ndarray): If image input is numpy ndarray.
+		flag (bool): If image input path.
 
 	Raises:
-
-	Examples:
+		IOError: If image isn't read successfully.
+		TypeError: If image doesn't have appropriate type.
 
 	"""
 
