@@ -3,20 +3,193 @@ import cv2
 
 
 
-def degree2rad():
-	pass
+def degree2rad(angle):
+	""" 
+	Convert angle from degree into the radians.
+
+	Args:
+		angle (int): Angle in degrees.
+
+	Returns:
+		anlge (float): Angle in radians.
+
+	Raises:
+		TypeError: If input angle is not integer.
+
+	Examples:
+		>>> degree2rad(180)
+		3.141592653589793
+		>>>
+		>>>
+		>>> degree2rad(540)
+		3.141592653589793
+
+	"""
+	
+	if type(angle) != int:
+		raise TypeError("Angle must be given as integer.")
+
+	return (angle % 360) * np.pi / 180
 
 
-def rotate_resize():
-	pass
+def rotate_resize(height, width, angle):
+	""" 
+	Resize the image in rotation process. Recompute height and width
+	of the image using old dimensions and angle of rotation.
+
+	Args:
+		height (int): Heigh of the image.
+		width (int): Width of the image.
+		angle (float): Rotation angle given in radians, in range [-2pi, 2pi].
+
+	Returns:
+		height_out (int): Height of the new output image.
+		width_out (int): Width of the new output image.
+
+	Raises:
+		ValueError: If rotation angle is not in specified range.
+
+	Examples:
+		>>> rotate_resize(100, 100, np.pi / 3)
+		(136, 136)
+		>>>
+		>>>
+		>>> rotate_resize(100, 100, np.pi / 4)
+		(141, 141)
+		>>>
+		>>>
+		>>> rotate_resize(100, 100, np.pi / 2)
+		(100, 100)
+		>>>
+		>>>
+	
+	"""
+
+	if not (angle >= -2 * np.pi and angle <= 2 * np.pi):
+		raise ValueError("Angle must be in range [-2pi, 2pi]")
+
+	height_out = np.abs(height * np.cos(angle)) + np.abs(width * np.sin(angle))
+	height_out = height_out.astype(np.int32)
+
+	width_out = np.abs(width * np.cos(angle)) + np.abs(height * np.sin(angle))
+	width_out = width_out.astype(np.int32)
+
+	return height_out, width_out
 
 
-def rotate2d():
-	pass
+def rotate2d(rotation_point, height, width, channel, angle):
+	""" 
+	The function computes indices of rotated image.
+
+	Args:
+		rotation_point (tuple, int): The point about which rotation is done.
+		height (numpy.ndarray): Array of indices for height dimension.
+		width (numpy.ndarray): Array of indices for width dimension.
+		channel (numpy.ndarray): Array of indices for channel dimension.
+		angle (float): Rotation angle given in radians, in range [-2pi, 2pi].
+
+	Returns:
+		idx_out (numpy.ndarray): Recalculated indices for rotated image.
+
+	Raises:
+		ValueError: If rotation angle is not in specified range.
+
+	Examples:
+		>>> positions = pixel_position(2, 3, 1)
+		>>> positions
+		array([[0, 0, 0],
+		       [1, 0, 0],
+		       [0, 1, 0],
+		       [1, 1, 0],
+		       [0, 2, 0],
+		       [1, 2, 0]])
+		>>>
+		>>>
+		>>> height = positions[:, 0]
+		>>> height
+		array([0, 1, 0, 1, 0, 1])
+		>>>
+		>>>
+		>>> width = positions[:, 1]
+		>>> width
+		array([0, 0, 1, 1, 2, 2])
+		>>>
+		>>>
+		>>> channel = positions[:, 2]
+		>>> channel
+		array([0, 0, 0, 0, 0, 0])
+		>>>
+		>>>
+		>>> rotate2d((2 // 2, 3 // 2). height, width, channel, np.pi / 3)
+		
+	
+	"""
+
+	if not (angle >= -2 * np.pi and angle <= 2 * np.pi):
+		raise ValueError("Angle must be in range [-2pi, 2pi]")
+
+	x0, y0 = rotation_point
+
+	height_idx_out = x0 + height * np.cos(angle) - width * np.sin(angle)
+	height_idx_out = height_idx_out.astype(np.int32)
+	height_idx_out = height_idx_out.reshape(-1, 1)
+
+	width_idx_out = y0 + height * np.sin(angle) + width * np.cos(angle)
+	width_idx_out = width_idx_out.astype(np.int32)
+	width_idx_out = width_idx_out.reshape(-1, 1)
+
+	channel_idx_out = channel.reshape(-1, 1)
+
+	idx_out = np.concatenate([height_idx_out, width_idx_out, channel_idx_out], 1)
+
+	return idx_out
 
 
-def pixel_position():
-	pass
+def pixel_position(height, width, channel):
+	""" 
+	Compute pixel positions for the given dimensions of an image.
+
+	Args:
+		height (int): Height of the image.
+		width (int): Width of the image.
+		channel (int): Number of channels of the image.
+
+	Returns:
+		idx (numpy.ndarray): Array of positions for each pixel. 
+							 Length of the array is height x width x channel. 
+
+	Raises:
+		TypeError: All parameters must be integer.
+
+	Examples:
+		>>> pixel_position(2, 2, 2)
+		array([[0, 0, 0],
+		       [1, 0, 0],
+		       [0, 1, 0],
+		       [1, 1, 0],
+		       [0, 0, 1],
+		       [1, 0, 1],
+		       [0, 1, 1],
+		       [1, 1, 1]])
+		>>>
+		>>>
+		>>> pixel_position(2, 3, 1)
+		array([[0, 0, 0],
+		       [1, 0, 0],
+		       [0, 1, 0],
+		       [1, 1, 0],
+		       [0, 2, 0],
+		       [1, 2, 0]])
+	
+	"""
+	if type(height) != int:
+		raise TypeError("Height of the image must be integer. ")
+	if type(width) != int:
+		raise TypeError("Width of the image must be integer. ")
+	if type(channel) != int:
+		raise TypeError("Channel of the image must be integer. ")
+
+	return np.indices([height, width, channel]).T.reshape(-1, 3)
 
 
 def rotate_image(image, angle):
@@ -68,14 +241,11 @@ def rotate_image(image, angle):
 	print(channel)
 
 	# Convert rotation angle from degrees to radians
-	angle_rad = (angle % 360) * np.pi / 180
+	angle_rad = degree2rad(angle)
 
 	# Recompute dimensions of the output image based on converted angle and 
 	# above extracted dimensions od the original image
-	height_out = np.abs(height * np.cos(angle_rad)) + np.abs(width * np.sin(angle_rad))
-	height_out = height_out.astype(np.int32)
-	width_out = np.abs(width * np.cos(angle_rad)) + np.abs(height * np.sin(angle_rad))
-	width_out = width_out.astype(np.int32)
+	height_out, width_out = rotate_resize(height, width, angle_rad)
 
 	# Create output image
 	img_out = np.zeros([height_out + 1, width_out + 1, channel])
@@ -83,22 +253,10 @@ def rotate_image(image, angle):
 	# Get position of each pixel in the image
 	# For e.g. if image has dimensions (2, 3, 2), positions are
 	# (0, 0, 0), (1, 0, 0), (0, 1, 0), (1, 1, 0), (0, 2, 0), etc.
-	idx = np.indices([height, width, channel]).T.reshape(-1, channel)
+	idx = pixel_position(height, width, channel)
 
-	# Recompute indices using rotation angle and input image indices
-	height_idx_out = idx[:, 0] * np.cos(angle_rad) - idx[:, 1] * np.sin(angle_rad)
-	height_idx_out = height_idx_out.astype(np.int32)
-	height_idx_out = height_idx_out.reshape(-1, 1)
-	print(np.max(height_out))
-
-	width_idx_out = idx[:, 0] * np.sin(angle_rad) + idx[:, 1] * np.cos(angle_rad)
-	width_idx_out = width_idx_out.astype(np.int32)
-	width_idx_out = width_idx_out.reshape(-1, 1)
-	print(np.max(width_idx_out))
-
-	channel_idx_out = idx[:, 2].reshape(-1, 1)
-
-	idx_out = np.concatenate([height_idx_out, width_idx_out, channel_idx_out], 1)
+	# Recompute indices using rotation angle and input image indice
+	idx_out = rotate2d((height // 2, width // 2), idx[:, 0], idx[:, 1], idx[:, 2], angle_rad)
 
 	print(idx.shape)
 	print(idx_out.shape)
