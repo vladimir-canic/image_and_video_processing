@@ -85,7 +85,34 @@ def rotate_image(image, angle):
 
 
 def main():
-	pass
+	
+	##################################################
+	# Test without OpenCV                            #
+	##################################################
+
+	# Example 1
+
+	# Example 2
+
+	# Example 3
+
+	# Example 4
+
+	# Example 5
+
+	##################################################
+	# Test with OpenCV                               #
+	##################################################
+
+	# Example 1
+
+	# Example 2
+
+	# Example 3
+
+	# Example 4
+
+	# Example 5
 
 
 if __name__ == "__main__":
