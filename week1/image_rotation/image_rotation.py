@@ -2,6 +2,23 @@ import numpy as np
 import cv2
 
 
+
+def degree2rad():
+	pass
+
+
+def rotate_resize():
+	pass
+
+
+def rotate2d():
+	pass
+
+
+def pixel_position():
+	pass
+
+
 def rotate_image(image, angle):
 	"""
 	Rotate given image for the given angle.
@@ -42,9 +59,13 @@ def rotate_image(image, angle):
 	# Create output image with recalculated dimensions for given rotation angle    #                                      #
 	################################################################################
 
-	height = image.shape[0]
-	width = image.shape[1]
-	channel = image.shape[2]
+	height = img.shape[0]
+	width = img.shape[1]
+	channel = img.shape[2]
+
+	print(height)
+	print(width)
+	print(channel)
 
 	# Convert rotation angle from degrees to radians
 	angle_rad = (angle % 360) * np.pi / 180
@@ -52,10 +73,12 @@ def rotate_image(image, angle):
 	# Recompute dimensions of the output image based on converted angle and 
 	# above extracted dimensions od the original image
 	height_out = np.abs(height * np.cos(angle_rad)) + np.abs(width * np.sin(angle_rad))
+	height_out = height_out.astype(np.int32)
 	width_out = np.abs(width * np.cos(angle_rad)) + np.abs(height * np.sin(angle_rad))
+	width_out = width_out.astype(np.int32)
 
 	# Create output image
-	img_out = np.zeros([height_out, width_out, channel])
+	img_out = np.zeros([height_out + 1, width_out + 1, channel])
 
 	# Get position of each pixel in the image
 	# For e.g. if image has dimensions (2, 3, 2), positions are
@@ -64,24 +87,51 @@ def rotate_image(image, angle):
 
 	# Recompute indices using rotation angle and input image indices
 	height_idx_out = idx[:, 0] * np.cos(angle_rad) - idx[:, 1] * np.sin(angle_rad)
-	width_idx_out = idx[:, 0] * np.sin(angle_rad) + idx[:, 1] * np.cos(angle_rad)	
-	idx_out = np.concatenate([height_idx_out, width_idx_out, channel], 2)
+	height_idx_out = height_idx_out.astype(np.int32)
+	height_idx_out = height_idx_out.reshape(-1, 1)
+	print(np.max(height_out))
+
+	width_idx_out = idx[:, 0] * np.sin(angle_rad) + idx[:, 1] * np.cos(angle_rad)
+	width_idx_out = width_idx_out.astype(np.int32)
+	width_idx_out = width_idx_out.reshape(-1, 1)
+	print(np.max(width_idx_out))
+
+	channel_idx_out = idx[:, 2].reshape(-1, 1)
+
+	idx_out = np.concatenate([height_idx_out, width_idx_out, channel_idx_out], 1)
+
+	print(idx.shape)
+	print(idx_out.shape)
+
+	print(img_out.shape)
+	print(img.shape)
+
+	print(np.max(idx.reshape(-1)))
+	print(np.max(idx_out.reshape(-1)))
+
+	print(idx_out[:10])
+	print(idx[:10])
 
 	# Write input image and create rotated image
-	img_out[idx_out] = img[idx]
+	# img_out[idx_out] = img[idx]
+	try:
+		for i in range(idx.shape[0]):
+			img_out[idx_out[i]] = img[idx[i]]
+	except ValueError:
+		print(i)
 
 	################################################################################
 	# Write and return the output                                                  #
 	################################################################################
 
 	if type(image) == str:
-        path_segments = image.split('/')
-        name, extension = path_segments[-1].split('.')
-        output = '/'.join(path_segments[:-1]) + '/' + name + "_out." + extension
-        cv2.imwrite(output, img_out)
-        return True
+		path_segments = image.split('/')
+		name, extension = path_segments[-1].split('.')
+		output = '/'.join(path_segments[:-1]) + '/' + name + "_out." + extension
+		cv2.imwrite(output, img_out)
+		return True
 
-    return img_out
+	return img_out
 
 
 def main():
@@ -91,6 +141,9 @@ def main():
 	##################################################
 
 	# Example 1
+	img_path = "./data/image001.jpg"
+	print(rotate_image(img_path, 45))
+	print("\n")
 
 	# Example 2
 
