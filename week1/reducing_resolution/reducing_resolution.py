@@ -1,5 +1,6 @@
 import os
 import time
+import re
 
 import numpy as np 
 import cv2
@@ -126,29 +127,57 @@ def main():
 	# Test with images                                                   #
 	######################################################################
 
-	#-----------------------------------------------#
-	# Block size 3 x 3                              #
-	#-----------------------------------------------#
+	def test_reducing(images, block):
+		"""
+		Auxiliary function for testing.
 
-	print (20 * "=", 
-		   "Reducing Image Resolution using 3 by 3 block. ", 
-		   20 * "=")
+		Args:
+			images (list, str): List of images for reducing.
+			block (int): How many times we reduce particular image.
 
-	block_size = 3
+		Returns:
+			-
+		"""
 
-	for image in sorted(os.listdir("./data/")):
-		img_path = "./data/" + image
-		print("Reducing image resolution ...")
-		start = time.time()
-		reduced = reduce_resolution(img_path, block_size)
-		end = time.time()
-		print("Execution time:", end - start)
-		if reduced:
-			print("Image", image, "successfully reduced ...")
-		print("\n")
+		print (20 * "=", 
+			   "Reducing Image Resolution using", 
+			   block, "by", block, "block. ", 
+			   20 * "=")
 
-	
-	
+		for img_path in images:
+			print("Reducing image resolution ...")
+			start = time.time()
+			reduced = reduce_resolution(img_path, block)
+			end = time.time()
+			print("Execution time:", end - start, "seconds")
+			if reduced:
+				print("Image", img_path.split("/")[-1], 
+					  "successfully reduced ...")
+			print("\n")
+
+	images = ["./data/" + item 
+			  for item in sorted(os.listdir("./data/")) 
+			  if re.match("image[0-9][0-9][0-9].jpg", item)]
+
+	#-----------------------------------------------------------------#
+	# Block size 3 x 3                                                #
+	#-----------------------------------------------------------------#
+	test_reducing(images, 3)
+
+	#-----------------------------------------------------------------#
+	# Block size 5 x 5                                                #
+	#-----------------------------------------------------------------#
+	test_reducing(images, 5)
+
+	#-----------------------------------------------------------------#
+	# Block size 7 x 7                                                #
+	#-----------------------------------------------------------------#
+	test_reducing(images, 7)
+
+	#-----------------------------------------------------------------#
+	# Block size 10 x 10                                              #
+	#-----------------------------------------------------------------#
+	test_reducing(images, 10)
 
 
 if __name__ == "__main__":
