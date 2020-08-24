@@ -63,7 +63,8 @@ def reduce_resolution(image, block):
     if type(image) == str:
         path_segments = image.split('/')
         name, extension = path_segments[-1].split('.')
-        output = '/'.join(path_segments[:-1]) + '/' + name + 'OpenCV_out.' + extension
+        output = '/'.join(path_segments[:-1]) + 
+        		 '/' + name + 'OpenCV_out.' + extension
         cv2.imwrite(output, img_out)
         return True
 
@@ -71,7 +72,55 @@ def reduce_resolution(image, block):
 
 
 def main():
-	pass
+	
+	##############################################################
+	# Test with numpy ndarray                                    #
+	##############################################################
+
+	# Example 1
+	img = ...
+	print(...)
+	print("\n")
+
+	# Example 2
+	img = ...
+	print(...)
+	print("\n")
+
+	# Example 3
+	img = ...
+	print(...)
+	print("\n")
+
+
+	##############################################################
+	# Test with numpy ndarray                                    #
+	##############################################################
+
+	# Example 1
+	img_path = ...
+	print(...)
+	print("\n")
+
+	# Example 2
+	img_path = ...
+	print(...)
+	print("\n")
+
+	# Example 3
+	img_path = ...
+	print(...)
+	print("\n")
+
+	# Example 4
+	img_path = ...
+	print(...)
+	print("\n")
+
+	# Example 5
+	img_path = ...
+	print(...)
+	print("\n")
 
 
 if __name__ == "__main__":
