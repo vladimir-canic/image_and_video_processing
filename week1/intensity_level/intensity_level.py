@@ -14,6 +14,9 @@ def check_intensity_level(level):
 	Returns:
 		validity (bool): Intensity level is correct or not.
 
+	Raises:
+		TypeError: If type of level is not integer.
+
 	Examples:
 		>>> check_intensity_level(64)
 		True
@@ -21,6 +24,10 @@ def check_intensity_level(level):
 		False
 
 	"""
+
+	if type(level) != int:
+		raise TypeError("Type of level must be integer. ")
+
 	return level in map(lambda x: 2 ** x, range(1, 8))
 
 
@@ -86,9 +93,9 @@ def main():
 
 	"""
 
-	####################################################
-	# Example 1                                        #
-	####################################################
+	###################################################################
+	# Example 1                                                       #
+	###################################################################
 	test_example_image = np.array([
 			[234, 214, 217], 
 			[123, 147, 186], 
@@ -101,9 +108,9 @@ def main():
 	print("\n")
 
 
-	####################################################
-	# Example 2                                        #
-	####################################################
+	###################################################################
+	# Example 2                                                       #
+	###################################################################
 	test_example_image = "./data/image001.jpeg"
 	test_example_level = 8
 
