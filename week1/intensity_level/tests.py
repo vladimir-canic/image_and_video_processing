@@ -102,6 +102,49 @@ class CheckIntensityLevel(unittest.TestCase):
 class IntensityLevel(unittest.TestCase):
 
 	def setUp(self):
+
+		# Variables that represents incorrect intensity level
+
+
+		# Variables that are used for checking reading image
+		# String, correct
+
+		# String, incorrect
+
+		# Numpy ndarray
+
+		# Other incorrect types
+
+
+		# Variables for testing correctness of intensity level function
+		# Input
+
+		# Output
+
+		pass
+
+
+	def test_incorrect_level(self):
+		pass
+
+
+	def test_string_correct(self):
+		pass
+
+
+	def test_string_incorrect(self):
+		pass
+
+
+	def test_numpyndarray_correct(self):
+		pass
+
+
+	def test_type_incorrect(self):
+		pass
+
+
+	def test_algorithm_validity(self):
 		pass
 
 
