@@ -88,8 +88,11 @@ def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant'
 		raise TypeError("Image type must be string that represents path to the image."
 						"Or image type must be numpy n-dimensional array.")
 
+	if img.shape > 3 or img.shape < 2:
+		ValueError("Dimensions of the input must 2 or 3. ")
+
 	if len(img.shape) == 2:
-		img = img.reshape(-1, 1)
+		img = img.reshape(img.shape[0], img.shape[1], 1)
 
 	# Init output tensor, output image
 	img_out = np.zeros(img.shape)
@@ -154,7 +157,7 @@ def pixel_average():
 def main():
 	
 	####################################################################
-	# Test for fumction Pixel Averaging Naive                          #
+	# Test for function Pixel Averaging Naive                          #
 	####################################################################
 
 	# Example 1
@@ -192,7 +195,7 @@ def main():
 	print("\n")
 	
 	####################################################################
-	# Test for fumction Pixel Averaging                                #
+	# Test for function Pixel Averaging                                #
 	####################################################################
 
 	# Example 1
