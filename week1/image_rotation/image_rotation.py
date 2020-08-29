@@ -224,6 +224,9 @@ def rotate_image(image, angle):
 	    				"path to the image."
 	    				"Or image type must be numpy n-dimensional array.")
 
+	if len(img.shape) > 3 or len(img.shape) < 2:
+		raise ValueError("Image must have 2 or 3 dimensions. ")
+
 	if len(img.shape) == 2:
 		img = img.reshape(-1, 1)
 
