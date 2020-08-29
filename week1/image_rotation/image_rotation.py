@@ -228,7 +228,7 @@ def rotate_image(image, angle):
 		raise ValueError("Image must have 2 or 3 dimensions. ")
 
 	if len(img.shape) == 2:
-		img = img.reshape(-1, 1)
+		img = img.reshape(img.shape[0], img.shape[1], 1)
 
 	################################################################################
 	# Create output image with recalculated dimensions for given rotation angle    #                                      #
