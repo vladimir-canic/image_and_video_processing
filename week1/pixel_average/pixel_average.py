@@ -17,9 +17,9 @@ def pad_with(vector, pad_width, iaxis, kwargs):
 	Returns
 		-
 	"""
-    pad_value = kwargs.get('padder', 10)
-    vector[:pad_width[0]] = pad_value
-    vector[-pad_width[1]:] = pad_value
+	pad_value = kwargs.get('padder', 10)
+	vector[:pad_width[0]] = pad_value
+	vector[-pad_width[1]:] = pad_value
 
 
 def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant', padder=None):
@@ -88,11 +88,14 @@ def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant'
 		raise TypeError("Image type must be string that represents path to the image."
 						"Or image type must be numpy n-dimensional array.")
 
-	if img.shape > 3 or img.shape < 2:
-		ValueError("Dimensions of the input must 2 or 3. ")
+	if len(img.shape) > 3 or len(img.shape) < 2:
+		raise ValueError("Dimensions of the input must 2 or 3. ")
 
 	if len(img.shape) == 2:
 		img = img.reshape(img.shape[0], img.shape[1], 1)
+
+	if neighborhood > img.shape[0] or neighborhood > img.shape[1]:
+		raise ValueError("Neighborhood should be smaller than image. ")
 
 	# Init output tensor, output image
 	img_out = np.zeros(img.shape)
@@ -105,17 +108,17 @@ def pixel_average_naive(image, neighborhood, padtype="left-top", mode='constant'
 	# Averaging window size is even
 	if neighborhood % 2 == 0:
 		if padtype == "left-top":
-			left, top = bigger, bigger
-			right, bottom = smaller, smaller
-		elif padtype == "left-bottom":
-			left, bottom = bigger, bigger
-			right, top = smaller, smaller
-		elif padtype == "right-top":
-			right, top = bigger, bigger
-			left, bottom = smaller, smaller
-		elif padtype == "right-bottom":
-			right, bottom = bigger, bigger
 			left, top = smaller, smaller
+			right, bottom = bigger, bigger
+		elif padtype == "left-bottom":
+			left, bottom = smaller, smaller
+			right, top = bigger, bigger
+		elif padtype == "right-top":
+			right, top = smaller, smaller
+			left, bottom = bigger, bigger
+		elif padtype == "right-bottom":
+			right, bottom = smaller, smaller
+			left, top = bigger, bigger
 		else:
 			raise ValueError("Invalid padding type. ")
 
