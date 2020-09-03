@@ -2,6 +2,7 @@ import unittest
 import numpy as np 
 
 from image_rotation import degree2rad
+from image_rotation import rotate_resize
 from image_rotation import rotate2d
 from image_rotation import pixel_position
 from image_rotation import rotate_image
@@ -55,6 +56,17 @@ class TestDegree2Rad(unittest.TestCase):
 
 	def tearDown(self):
 		pass
+
+
+class TestRotateResize(unittest.TestCase):
+	
+
+	def setUp(self):
+		pass
+
+
+	def tearDown(self):
+		pass	
 
 
 class TestRotate2D(unittest.TestCase):
