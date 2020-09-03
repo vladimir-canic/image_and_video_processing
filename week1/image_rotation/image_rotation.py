@@ -268,13 +268,17 @@ def rotate_image(image, angle):
 	return img_out
 
 
-def rotate_image_cv2(image, angle):
+def rotate_image_cv2(image, angle, center=None, scale=1.0, output_path=None):
 	"""
 	Rotate given image for the given angle.
 
 	Args:
 		image(str): String that represents path to the image.
 		angle (int): Angle given in degrees, it is intger in range (-inf, inf).
+		center (tuple, int): Center of the rotation. If it's not specified
+							 the center is central point/pixel of the image.
+		scale (flaot): Image scale coefficient.
+		output_path (str): Destination for preserving rotated image.
 
 	Returns:
 		flag (bool): If image input path.
@@ -301,88 +305,197 @@ def rotate_image_cv2(image, angle):
 	if len(img.shape) == 2:
 		img = img.reshape(-1, 1)
 
+
 	################################################################################
 	# Create output image                                                          #
 	################################################################################
 
-	image_center = tuple(np.array(img.shape[1::-1]) // 2)
-	rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+	if center is None:
+		center = tuple(np.array(img.shape[1::-1]) // 2)
+
+	if not (center[0] < img.shape[0]) or not (center[1] < img.shape[1]):
+		raise ValueError("Center of rotation must in boundaries of the image. "
+						 "height > center.X and width > center.Y. ") 
+
+	rot_mat = cv2.getRotationMatrix2D(center, angle, scale)
 	img_out = cv2.warpAffine(img, 
 							 rot_mat, 
 							 img.shape[1::-1], 
 							 flags=cv2.INTER_LINEAR)
+
 
 	################################################################################
 	# Write and return the output                                                  #
 	################################################################################
 
 	if type(image) == str:
-		path_segments = image.split('/')
-		name, extension = path_segments[-1].split('.')
-		output = '/'.join(path_segments[:-1]) + '/' + name + "OpenCV_out." + extension
-		cv2.imwrite(output, img_out)
+		if output_path is None:
+			path_segments = image.split('/')
+			name, extension = path_segments[-1].split('.')
+			output = '/'.join(path_segments[:-1]) + '/' + name + "OpenCV_out." + extension
+		cv2.imwrite(output_path, img_out)
 		return True
 
 
 def main():
+
+	############################################################
+	# Test FLAGS                                               #
+	############################################################
+	TEST_WITHOUT_OPENCV = False
+	TEST_WITH_OPENCV_WITHOUT_SCALING = False
+	TEST_WITH_OPENCV_WITH_SCALING = True
+
 	
-	##################################################
-	# Test without OpenCV                            #
-	##################################################
+	############################################################
+	# Test without OpenCV                                      #
+	############################################################
 
-	# Example 1
-	img_path = "./data/image001.jpg"
-	print(rotate_image(img_path, 30))
-	print("\n")
+	if TEST_WITHOUT_OPENCV:
 
-	# Example 2
-	img_path = "./data/image002.jpg"
-	print(rotate_image(img_path, 60))
-	print("\n")
+		# Example 1
+		img_path = "./data/image001.jpg"
+		angle = 30
+		print(rotate_image(img_path, angle))
+		print("\n")
 
-	# Example 3
-	img_path = "./data/image003.jpg"
-	print(rotate_image(img_path, 90))
-	print("\n")
+		# Example 2
+		img_path = "./data/image002.jpg"
+		angle = 60
+		print(rotate_image(img_path, angle))
+		print("\n")
 
-	# Example 4
-	img_path = "./data/image004.jpg"
-	print(rotate_image(img_path, -60))
-	print("\n")
+		# Example 3
+		img_path = "./data/image003.jpg"
+		angle = 90
+		print(rotate_image(img_path, angle))
+		print("\n")
 
-	# Example 5
-	img_path = "./data/image005.jpg"
-	print(rotate_image(img_path, -30))
-	print("\n")
+		# Example 4
+		img_path = "./data/image004.jpg"
+		angle = -60
+		print(rotate_image(img_path, angle))
+		print("\n")
 
-	##################################################
-	# Test with OpenCV                               #
-	##################################################
+		# Example 5
+		img_path = "./data/image005.jpg"
+		angle = -30
+		print(rotate_image(img_path, angle))
+		print("\n")
 
-	# Example 1
-	img_path = "./data/image001.jpg"
-	print(rotate_image_cv2(img_path, 30))
-	print("\n")
 
-	# Example 2
-	img_path = "./data/image002.jpg"
-	print(rotate_image_cv2(img_path, 60))
-	print("\n")
+	############################################################
+	# Test with OpenCV                                         #
+	############################################################
 
-	# Example 3
-	img_path = "./data/image003.jpg"
-	print(rotate_image_cv2(img_path, 90))
-	print("\n")
+	#--------------------------------------------------#
+	# Rotation without scaling and                     #
+	# with respect to the center of the image          # 
+	#--------------------------------------------------#
 
-	# Example 4
-	img_path = "./data/image004.jpg"
-	print(rotate_image_cv2(img_path, -60))
-	print("\n")
+	if TEST_WITH_OPENCV_WITHOUT_SCALING:
 
-	# Example 5
-	img_path = "./data/image005.jpg"
-	print(rotate_image_cv2(img_path, -30))
-	print("\n")
+		# Example 1
+		img_path = "./data/image001.jpg"
+		angle = 30
+		print(rotate_image_cv2(img_path, angle))
+		print("\n")
+
+		# Example 2
+		img_path = "./data/image002.jpg"
+		angle = 60
+		print(rotate_image_cv2(img_path, angle))
+		print("\n")
+
+		# Example 3
+		img_path = "./data/image003.jpg"
+		angle = 90
+		print(rotate_image_cv2(img_path, angle))
+		print("\n")
+
+		# Example 4
+		img_path = "./data/image004.jpg"
+		angle = -60
+		print(rotate_image_cv2(img_path, angle))
+		print("\n")
+
+		# Example 5
+		img_path = "./data/image005.jpg"
+		angle = -30
+		print(rotate_image_cv2(img_path, angle))
+		print("\n")
+
+	#--------------------------------------------------#
+	# Rotation with scaling and                        #
+	# different points of rotation                     # 
+	#--------------------------------------------------#
+
+	if TEST_WITH_OPENCV_WITH_SCALING:
+
+		# Example 1
+		img_path = "./data/image001.jpg"
+		angle = 45
+		center = (0, 0)
+		scale = 2.0
+		output_path = "./data/image001_OpenCV_scale2_0.jpg"
+		print(rotate_image_cv2(img_path, 
+							   angle, 
+							   center, 
+							   scale, 
+							   output_path))
+		print("\n")
+
+		# Example 2
+		img_path = "./data/image002.jpg"
+		angle = 45
+		center = (100, 100)
+		scale = 2.5
+		output_path = "./data/image002_OpenCV_scale2_5.jpg"
+		print(rotate_image_cv2(img_path, 
+							   angle, 
+							   center, 
+							   scale, 
+							   output_path))
+		print("\n")
+		
+		# Example 3
+		img_path = "./data/image003.jpg"
+		angle = 30
+		center = (50, 50)
+		scale = 3.0
+		output_path = "./data/image003_OpenCV_scale3_0.jpg"
+		print(rotate_image_cv2(img_path, 
+							   angle, 
+							   center, 
+							   scale, 
+							   output_path))
+		print("\n")
+		
+		# Example 4
+		img_path = "./data/image004.jpg"
+		angle = 30
+		center = (0, 0)
+		scale = 0.5
+		output_path = "./data/image004_OpenCV_scale0_5.jpg"
+		print(rotate_image_cv2(img_path, 
+							   angle, 
+							   center, 
+							   scale, 
+							   output_path))
+		print("\n")
+		
+		# Example 5
+		img_path = "./data/image005.jpg"
+		angle = 270
+		center = (250, 150)
+		scale = 1.5
+		output_path = "./data/image005_OpenCV_scale1_5.jpg"
+		print(rotate_image_cv2(img_path, 
+							   angle, 
+							   center, 
+							   scale, 
+							   output_path))
+		print("\n")
 
 
 if __name__ == "__main__":
