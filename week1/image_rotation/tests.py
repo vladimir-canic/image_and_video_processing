@@ -257,12 +257,28 @@ class TestRotateImage(unittest.TestCase):
 		pass
 
 
-class TestRotateImageCV(unittest.TestCase):
+class TestRotateImageOpenCV(unittest.TestCase):
 	
 
 	def setUp(self):
 
 		""" Create testing variable for OpenCV function rotate image. """
+		pass
+
+
+	def test_image_type(self):
+		pass
+
+
+	def test_image_shape(self):
+		pass
+
+
+	def test_rotation_center(self):
+		pass
+
+
+	def test_rotaton_matrix2D(self):
 		pass
 
 

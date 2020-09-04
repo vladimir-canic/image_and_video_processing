@@ -1,6 +1,24 @@
+from enum import Enum
+
 import numpy as np 
 import cv2
 
+
+
+class InterpolationFlags(Enum):
+
+	INTER_NEAREST = cv2.INTER_NEAREST
+	INTER_LINEAR = cv2.INTER_LINEAR
+	INTER_CUBIC = cv2.INTER_CUBIC
+	INTER_AREA = cv2.INTER_AREA
+	INTER_LANCZOS4 = cv2.INTER_LANCZOS4
+	INTER_MAX = cv2.INTER_MAX
+	WARP_FILL_OUTLIERS cv2.WARP_FILL_OUTLIERS
+	WARP_INVERSE_MAP = cv2.WARP_INVERSE_MAP
+
+	@classmethod
+	def __contains__(cls, value):
+		return value in cls.__value2member_map__
 
 
 def degree2rad(angle):
@@ -268,13 +286,21 @@ def rotate_image(image, angle):
 	return img_out
 
 
-def rotate_image_cv2(image, angle, center=None, scale=1.0, output_path=None):
+def rotate_image_cv2(image, 
+					 angle, 
+					 interpolation=None, 
+					 output_size=None, 
+					 center=None, 
+					 scale=1.0, 
+					 output_path=None):
 	"""
 	Rotate given image for the given angle.
 
 	Args:
 		image(str): String that represents path to the image.
 		angle (int): Angle given in degrees, it is intger in range (-inf, inf).
+		interploation (int): Type of interpolation.
+		output_size (tuple, int): Shape of the output image.
 		center (tuple, int): Center of the rotation. If it's not specified
 							 the center is central point/pixel of the image.
 		scale (flaot): Image scale coefficient.
@@ -303,7 +329,7 @@ def rotate_image_cv2(image, angle, center=None, scale=1.0, output_path=None):
 	    				"Or image type must be numpy n-dimensional array.")
 
 	if len(img.shape) == 2:
-		img = img.reshape(-1, 1)
+		img = img.reshape(shape[0], shape[1], 1)
 
 
 	################################################################################
@@ -344,7 +370,9 @@ def main():
 	############################################################
 	TEST_WITHOUT_OPENCV = False
 	TEST_WITH_OPENCV_WITHOUT_SCALING = False
-	TEST_WITH_OPENCV_WITH_SCALING = True
+	TEST_WITH_OPENCV_WITH_SCALING = False
+	TEST_WITH_OPENCV_WITH_INTERPOLATION = False
+	TEST_WITH_OPENCV_WITH_OUTPUT_SIZE = False
 
 	
 	############################################################
@@ -440,9 +468,9 @@ def main():
 		output_path = "./data/image001_OpenCV_scale2_0.jpg"
 		print(rotate_image_cv2(img_path, 
 							   angle, 
-							   center, 
-							   scale, 
-							   output_path))
+							   center=center, 
+							   scale=scale, 
+							   output_path=output_path))
 		print("\n")
 
 		# Example 2
@@ -453,9 +481,9 @@ def main():
 		output_path = "./data/image002_OpenCV_scale2_5.jpg"
 		print(rotate_image_cv2(img_path, 
 							   angle, 
-							   center, 
-							   scale, 
-							   output_path))
+							   center=center, 
+							   scale=scale, 
+							   output_path=output_path))
 		print("\n")
 		
 		# Example 3
@@ -466,9 +494,9 @@ def main():
 		output_path = "./data/image003_OpenCV_scale3_0.jpg"
 		print(rotate_image_cv2(img_path, 
 							   angle, 
-							   center, 
-							   scale, 
-							   output_path))
+							   center=center, 
+							   scale=scale, 
+							   output_path=output_path))
 		print("\n")
 		
 		# Example 4
@@ -479,9 +507,9 @@ def main():
 		output_path = "./data/image004_OpenCV_scale0_5.jpg"
 		print(rotate_image_cv2(img_path, 
 							   angle, 
-							   center, 
-							   scale, 
-							   output_path))
+							   center=center, 
+							   scale=scale, 
+							   output_path=output_path))
 		print("\n")
 		
 		# Example 5
@@ -492,9 +520,9 @@ def main():
 		output_path = "./data/image005_OpenCV_scale1_5.jpg"
 		print(rotate_image_cv2(img_path, 
 							   angle, 
-							   center, 
-							   scale, 
-							   output_path))
+							   center=center, 
+							   scale=scale, 
+							   output_path=output_path))
 		print("\n")
 
 
