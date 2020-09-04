@@ -12,13 +12,17 @@ class InterpolationFlags(Enum):
 	INTER_CUBIC = cv2.INTER_CUBIC
 	INTER_AREA = cv2.INTER_AREA
 	INTER_LANCZOS4 = cv2.INTER_LANCZOS4
-	INTER_MAX = cv2.INTER_MAX
-	WARP_FILL_OUTLIERS cv2.WARP_FILL_OUTLIERS
+	WARP_FILL_OUTLIERS = cv2.WARP_FILL_OUTLIERS
 	WARP_INVERSE_MAP = cv2.WARP_INVERSE_MAP
+
 
 	@classmethod
 	def __contains__(cls, value):
 		return value in cls.__value2member_map__
+
+
+	def __str__(self):
+		return str(self.value)
 
 
 def degree2rad(angle):
@@ -289,7 +293,7 @@ def rotate_image(image, angle):
 def rotate_image_cv2(image, 
 					 angle, 
 					 interpolation=None, 
-					 output_size=None, 
+					 output_shape=None, 
 					 center=None, 
 					 scale=1.0, 
 					 output_path=None):
@@ -299,8 +303,8 @@ def rotate_image_cv2(image,
 	Args:
 		image(str): String that represents path to the image.
 		angle (int): Angle given in degrees, it is intger in range (-inf, inf).
-		interploation (int): Type of interpolation.
-		output_size (tuple, int): Shape of the output image.
+		interpolation (int): Type of interpolation.
+		output_shape (tuple, int): Shape of the output image.
 		center (tuple, int): Center of the rotation. If it's not specified
 							 the center is central point/pixel of the image.
 		scale (flaot): Image scale coefficient.
@@ -334,7 +338,14 @@ def rotate_image_cv2(image,
 
 	################################################################################
 	# Create output image                                                          #
-	################################################################################
+	################################################################################s
+
+	if interpolation is None:
+		interpolation = cv2.INTER_LINEAR
+	elif not interpolation in InterpolationFlags:
+		raise ValueError("Wrong value for interpolation. ")
+	else:
+		interpolation = interpolation.value
 
 	if center is None:
 		center = tuple(np.array(img.shape[1::-1]) // 2)
@@ -343,11 +354,16 @@ def rotate_image_cv2(image,
 		raise ValueError("Center of rotation must in boundaries of the image. "
 						 "height > center.X and width > center.Y. ") 
 
+	if output_shape is None:
+		output_shape = img.shape[1::-1]
+	elif len(output_shape) !=  2:
+		raise ValueError("Shape of the output image should be 2 two dimensions. ")
+
 	rot_mat = cv2.getRotationMatrix2D(center, angle, scale)
 	img_out = cv2.warpAffine(img, 
 							 rot_mat, 
-							 img.shape[1::-1], 
-							 flags=cv2.INTER_LINEAR)
+							 output_shape, 
+							 flags=interpolation)
 
 
 	################################################################################
@@ -358,7 +374,7 @@ def rotate_image_cv2(image,
 		if output_path is None:
 			path_segments = image.split('/')
 			name, extension = path_segments[-1].split('.')
-			output = '/'.join(path_segments[:-1]) + '/' + name + "OpenCV_out." + extension
+			output_path = '/'.join(path_segments[:-1]) + '/' + name + "_OpenCV_out." + extension
 		cv2.imwrite(output_path, img_out)
 		return True
 
@@ -368,11 +384,16 @@ def main():
 	############################################################
 	# Test FLAGS                                               #
 	############################################################
+
 	TEST_WITHOUT_OPENCV = False
+
 	TEST_WITH_OPENCV_WITHOUT_SCALING = False
 	TEST_WITH_OPENCV_WITH_SCALING = False
 	TEST_WITH_OPENCV_WITH_INTERPOLATION = False
-	TEST_WITH_OPENCV_WITH_OUTPUT_SIZE = False
+	TEST_WITH_OPENCV_WITH_OUTPUT_SHAPE = True
+
+	TEST_WITH_OPENCV_ROTATION_MATRIX_2D = False
+	TEST_WITH_OPENCV_WARP_AFFINE = False
 
 	
 	############################################################
@@ -524,6 +545,129 @@ def main():
 							   scale=scale, 
 							   output_path=output_path))
 		print("\n")
+
+
+	#--------------------------------------------------#
+	# Test interpolation                               #
+	#--------------------------------------------------#
+
+	if TEST_WITH_OPENCV_WITH_INTERPOLATION:
+
+		img_path = "./data/image005.jpg"
+		angle = 45
+		output_shape = None
+		center = None
+		scale = 1.0
+		
+		# Example 1
+		interpolation = InterpolationFlags.INTER_NEAREST
+		output_path = "./data/image005_OpenCV_inter_nearest.jpg"
+		print(rotate_image_cv2(image=img_path,
+							   angle=angle,
+							   interpolation=interpolation,
+							   output_shape=output_shape,
+							   center=center,
+							   scale=scale,
+							   output_path=output_path))
+		print("\n")
+
+		# Example 2
+		interpolation = InterpolationFlags.INTER_LINEAR
+		output_path = "./data/image005_OpenCV_inter_linear.jpg"
+		print(rotate_image_cv2(image=img_path,
+							   angle=angle,
+							   interpolation=interpolation,
+							   output_shape=output_shape,
+							   center=center,
+							   scale=scale,
+							   output_path=output_path))
+		print("\n")
+
+		# Example 3
+		interpolation = InterpolationFlags.INTER_CUBIC
+		output_path = "./dataimage005_OpenCV_inter_cubic.jpg"
+		print(rotate_image_cv2(image=img_path,
+							   angle=angle,
+							   interpolation=interpolation,
+							   output_shape=output_shape,
+							   center=center,
+							   scale=scale,
+							   output_path=output_path))
+		print("\n")
+
+		# Example 4
+		interpolation = InterpolationFlags.INTER_AREA
+		output_path = "./data/image005_OpenCV_inter_area.jpg"
+		print(rotate_image_cv2(image=img_path,
+							   angle=angle,
+							   interpolation=interpolation,
+							   output_shape=output_shape,
+							   center=center,
+							   scale=scale,
+							   output_path=output_path))
+		print("\n")
+
+		# Example 5
+		interpolation = InterpolationFlags.INTER_LANCZOS4
+		output_path = "./data/image005_OpenCV_inter_lancz0s4.jpg"
+		print(rotate_image_cv2(image=img_path,
+							   angle=angle,
+							   interpolation=interpolation,
+							   output_shape=output_shape,
+							   center=center,
+							   scale=scale,
+							   output_path=output_path))
+		print("\n")
+
+		# Example 6
+		interpolation = InterpolationFlags.WARP_FILL_OUTLIERS
+		output_path = "./data.image005_OpenCV_inter_warp_fill.jpg"
+		print(rotate_image_cv2(image=img_path,
+							   angle=angle,
+							   interpolation=interpolation,
+							   output_shape=output_shape,
+							   center=center,
+							   scale=scale,
+							   output_path=output_path))
+		print("\n")
+
+		# Example 7
+		interpolation = InterpolationFlags.WARP_INVERSE_MAP
+		output_path = "./data/image005_OpenCV_inter_warp_inverse.jpg"
+		print(rotate_image_cv2(image=img_path,
+							   angle=angle,
+							   interpolation=interpolation,
+							   output_shape=output_shape,
+							   center=center,
+							   scale=scale,
+							   output_path=output_path))
+		print("\n")
+
+		#--------------------------------------------------#
+		# Test Output Shape                                #
+		#--------------------------------------------------#
+
+		if TEST_WITH_OPENCV_WITH_OUTPUT_SHAPE:
+			
+			# Example 1
+
+			# Example 2
+
+			# Example 3
+
+		#--------------------------------------------------#
+		# Test Rotation Matrix 2D                          #
+		#--------------------------------------------------#
+
+		if TEST_WITH_OPENCV_ROTATION_MATRIX_2D:
+			pass
+
+		#--------------------------------------------------#
+		# Test Warp Affine                                 #
+		#--------------------------------------------------#
+
+		if TEST_WITH_OPENCV_WARP_AFFINE:
+			pass
 
 
 if __name__ == "__main__":

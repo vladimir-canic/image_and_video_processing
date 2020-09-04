@@ -263,7 +263,21 @@ class TestRotateImageOpenCV(unittest.TestCase):
 	def setUp(self):
 
 		""" Create testing variable for OpenCV function rotate image. """
-		pass
+		
+		# Variables for testing the image type
+
+		# Variables for testing the image shape
+
+		# Variables for testing the interpolation parameter
+
+		# Varibale for testing the output shape of the rotated image
+
+		# Variables for testing rotation center point
+
+		# Variables for testing rotation matrix
+
+		# Variables for testing warp affine transformation
+
 
 
 	def test_image_type(self):
@@ -274,11 +288,23 @@ class TestRotateImageOpenCV(unittest.TestCase):
 		pass
 
 
+	def test_interpolation(self):
+		pass
+
+
+	def test_output_shape(self):
+		pass
+
+
 	def test_rotation_center(self):
 		pass
 
 
-	def test_rotaton_matrix2D(self):
+	def test_rotaton_matrix(self):
+		pass
+
+
+	def test_warp_affine(self):
 		pass
 
 
