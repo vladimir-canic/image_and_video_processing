@@ -3,6 +3,8 @@ from enum import Enum
 import numpy as np 
 import cv2
 
+import matplotlib.pyplot as plt
+
 
 
 class InterpolationFlags(Enum):
@@ -290,6 +292,10 @@ def rotate_image(image, angle):
 	return img_out
 
 
+def rotate_image_2():
+	pass
+
+
 def rotate_image_cv2(image, 
 					 angle, 
 					 interpolation=None, 
@@ -333,12 +339,12 @@ def rotate_image_cv2(image,
 	    				"Or image type must be numpy n-dimensional array.")
 
 	if len(img.shape) == 2:
-		img = img.reshape(shape[0], shape[1], 1)
+		img = img.reshape(img.shape[0], img.shape[1], 1)
 
 
 	################################################################################
 	# Create output image                                                          #
-	################################################################################s
+	################################################################################
 
 	if interpolation is None:
 		interpolation = cv2.INTER_LINEAR
@@ -348,14 +354,22 @@ def rotate_image_cv2(image,
 		interpolation = interpolation.value
 
 	if center is None:
-		center = tuple(np.array(img.shape[1::-1]) // 2)
-
-	if not (center[0] < img.shape[0]) or not (center[1] < img.shape[1]):
-		raise ValueError("Center of rotation must in boundaries of the image. "
-						 "height > center.X and width > center.Y. ") 
+		if output_shape is None:
+			center = tuple(np.array(img.shape[:2]) // 2)
+		else:
+			center = tuple(np.array(output_shape[:2]) // 2)
+	else:
+		if not (center[0] < img.shape[0]) or not (center[1] < img.shape[1]):
+			if output_shape is not None:
+				if not (center[0] < output_shape[0]) or not (center[1] < output_shape[1]):
+					raise ValueError("Center of rotation must in boundaries of the image. "
+									 "height > center.X and width > center.Y. ")
+				else:
+					raise ValueError("Center of rotation must in boundaries of the output image. "
+									 "height > center.X and width > center.Y. ") 
 
 	if output_shape is None:
-		output_shape = img.shape[1::-1]
+		output_shape = img.shape[:2]
 	elif len(output_shape) !=  2:
 		raise ValueError("Shape of the output image should be 2 two dimensions. ")
 
@@ -374,7 +388,8 @@ def rotate_image_cv2(image,
 		if output_path is None:
 			path_segments = image.split('/')
 			name, extension = path_segments[-1].split('.')
-			output_path = '/'.join(path_segments[:-1]) + '/' + name + "_OpenCV_out." + extension
+			output_path = '/'.join(path_segments[:-1]) + '/' +\
+						  name + "_OpenCV_out." + extension
 		cv2.imwrite(output_path, img_out)
 		return True
 
@@ -402,35 +417,11 @@ def main():
 
 	if TEST_WITHOUT_OPENCV:
 
-		# Example 1
-		img_path = "./data/image001.jpg"
-		angle = 30
-		print(rotate_image(img_path, angle))
-		print("\n")
+		img_path = ["./data/image00" + str(i) + ".jpg" for i in range(1, 6)]
+		angle = [30, 60, 90, -60, -30]
 
-		# Example 2
-		img_path = "./data/image002.jpg"
-		angle = 60
-		print(rotate_image(img_path, angle))
-		print("\n")
-
-		# Example 3
-		img_path = "./data/image003.jpg"
-		angle = 90
-		print(rotate_image(img_path, angle))
-		print("\n")
-
-		# Example 4
-		img_path = "./data/image004.jpg"
-		angle = -60
-		print(rotate_image(img_path, angle))
-		print("\n")
-
-		# Example 5
-		img_path = "./data/image005.jpg"
-		angle = -30
-		print(rotate_image(img_path, angle))
-		print("\n")
+		for i in range(len(img_path)):
+			print(rotate_image(img_path[i], angle[i]))
 
 
 	############################################################
@@ -444,35 +435,11 @@ def main():
 
 	if TEST_WITH_OPENCV_WITHOUT_SCALING:
 
-		# Example 1
-		img_path = "./data/image001.jpg"
-		angle = 30
-		print(rotate_image_cv2(img_path, angle))
-		print("\n")
+		img_path = ["./data/image00" + str(i) + ".jpg" for i in range(1, 6)]
+		angle = [30, 60, 90, -60, -30]
 
-		# Example 2
-		img_path = "./data/image002.jpg"
-		angle = 60
-		print(rotate_image_cv2(img_path, angle))
-		print("\n")
-
-		# Example 3
-		img_path = "./data/image003.jpg"
-		angle = 90
-		print(rotate_image_cv2(img_path, angle))
-		print("\n")
-
-		# Example 4
-		img_path = "./data/image004.jpg"
-		angle = -60
-		print(rotate_image_cv2(img_path, angle))
-		print("\n")
-
-		# Example 5
-		img_path = "./data/image005.jpg"
-		angle = -30
-		print(rotate_image_cv2(img_path, angle))
-		print("\n")
+		for i in range(len(img_path)):
+			print(rotate_image_cv2(img_path[i], angle[i]))
 
 	#--------------------------------------------------#
 	# Rotation with scaling and                        #
@@ -481,70 +448,21 @@ def main():
 
 	if TEST_WITH_OPENCV_WITH_SCALING:
 
-		# Example 1
-		img_path = "./data/image001.jpg"
-		angle = 45
-		center = (0, 0)
-		scale = 2.0
-		output_path = "./data/image001_OpenCV_scale2_0.jpg"
-		print(rotate_image_cv2(img_path, 
-							   angle, 
-							   center=center, 
-							   scale=scale, 
-							   output_path=output_path))
-		print("\n")
+		angle = [45, 45, 30, 30, 270]
+		center = [(0, 0), (100, 100), (50, 50), (0, 0), (250, 150)]
+		scale = [2.0, 2.5, 3.0, 0.5, 1.5]
+		img_path = ["./data/image00" + str(i) + ".jpg" for i in range(1, 6)]
+		output_path = ["./data/image00" + str(i) +\
+					   "_".join(['', 'OpenCV'] +\
+					   [str(item) for item in str(scale[i]).split('.')]) + ".jpg" for i in range(5)]
 
-		# Example 2
-		img_path = "./data/image002.jpg"
-		angle = 45
-		center = (100, 100)
-		scale = 2.5
-		output_path = "./data/image002_OpenCV_scale2_5.jpg"
-		print(rotate_image_cv2(img_path, 
-							   angle, 
-							   center=center, 
-							   scale=scale, 
-							   output_path=output_path))
-		print("\n")
-		
-		# Example 3
-		img_path = "./data/image003.jpg"
-		angle = 30
-		center = (50, 50)
-		scale = 3.0
-		output_path = "./data/image003_OpenCV_scale3_0.jpg"
-		print(rotate_image_cv2(img_path, 
-							   angle, 
-							   center=center, 
-							   scale=scale, 
-							   output_path=output_path))
-		print("\n")
-		
-		# Example 4
-		img_path = "./data/image004.jpg"
-		angle = 30
-		center = (0, 0)
-		scale = 0.5
-		output_path = "./data/image004_OpenCV_scale0_5.jpg"
-		print(rotate_image_cv2(img_path, 
-							   angle, 
-							   center=center, 
-							   scale=scale, 
-							   output_path=output_path))
-		print("\n")
-		
-		# Example 5
-		img_path = "./data/image005.jpg"
-		angle = 270
-		center = (250, 150)
-		scale = 1.5
-		output_path = "./data/image005_OpenCV_scale1_5.jpg"
-		print(rotate_image_cv2(img_path, 
-							   angle, 
-							   center=center, 
-							   scale=scale, 
-							   output_path=output_path))
-		print("\n")
+		for i in range(len(angle)):
+
+			print(rotate_image_cv2(img_path[i], 
+								   angle[i], 
+								   center=center[i], 
+								   scale=scale[i], 
+								   output_path=output_path[i]))
 
 
 	#--------------------------------------------------#
@@ -558,116 +476,352 @@ def main():
 		output_shape = None
 		center = None
 		scale = 1.0
+
+		interpolation = [
+				InterpolationFlags.INTER_NEAREST,
+				InterpolationFlags.INTER_LINEAR,
+				InterpolationFlags.INTER_CUBIC,
+				InterpolationFlags.INTER_AREA,
+				InterpolationFlags.INTER_LANCZOS4,
+				InterpolationFlags.WARP_FILL_OUTLIERS,
+				InterpolationFlags.WARP_INVERSE_MAP
+		]
+
+		output_path = [
+				"./data/image005_OpenCV_inter_nearest.jpg",
+				"./data/image005_OpenCV_inter_linear.jpg",
+				"./data/image005_OpenCV_inter_cubic.jpg",
+				"./data/image005_OpenCV_inter_area.jpg",
+				"./data/image005_OpenCV_inter_lancz0s4.jpg",
+				"./data/image005_OpenCV_inter_warp_fill.jpg",
+				"./data/image005_OpenCV_inter_warp_inverse.jpg"
+		]
 		
+		for i in range(len(interpolation)):
+
+			print(rotate_image_cv2(image=img_path,
+								   angle=angle,
+								   interpolation=interpolation[0],
+								   output_shape=output_shape,
+								   center=center,
+								   scale=scale,
+								   output_path=output_path[0]))
+
+
+	#--------------------------------------------------#
+	# Test Output Shape                                #
+	#--------------------------------------------------#
+
+	if TEST_WITH_OPENCV_WITH_OUTPUT_SHAPE:
+
+		img_path = "./data/image005.jpg"
+		angle = 30
+		interpolation = InterpolationFlags.INTER_LINEAR
+		output_shape = [(640, 360), (320, 180), 
+						(1818, 1022), (1900, 1100),
+						(1920, 1080), (2560, 1440)]
+		center = None # [(item[0] // 2, item[1] // 2) for item in output_shape]
+		scale = 1.0
+		output_path = ["./data/image005" +\
+					   "_".join([''] + [str(item) for item in output_shape[i]]) + ".jpg"
+					   for i in range(len(output_shape))]
+		
+		for i in range(len(output_shape)):
+
+			print(rotate_image_cv2(image=img_path,
+								   angle=angle,
+								   interpolation=interpolation,
+								   output_shape=output_shape[i],
+								   center=center,
+								   scale=scale,
+								   output_path=output_path[i]))
+
+	#--------------------------------------------------#
+	# Test Rotation Matrix 2D                          #
+	#--------------------------------------------------#
+
+	def rotataion_matrix_draw(points, center, angle, scale, displ, displ_scale):
+
+		"""
+		Auxiliary function for rotating and drawing object.
+
+		Args:
+			points (np.ndarray): Represent two dimensional object.
+			center (float): Center of the rotation.
+			angle (float): Angle of the rotation.
+			scale (float): Scale factor of the image.
+			displ (float): Displacement parameter for drawing the coordinate
+						   system axis through the center of rotation.
+			displ_scale (float): Parameter for scaling the axes of the new
+								 coordinate system.
+
+		Returns:
+			-
+
+		"""
+
+		points = np.concatenate([points, np.ones([1, points.shape[1]])])
+
+		horizontal = np.array([
+			[center[0] - displ * displ_scale, center[0] + displ * displ_scale],
+			[center[1], center[1]],
+			[1, 1]
+		])
+		vertical = np.array([
+			[center[0], center[0]],
+			[center[1] - displ * displ_scale, center[1] + displ * displ_scale],
+			[1, 1]
+		])
+
+		rotation_matrix = cv2.getRotationMatrix2D(center, angle, scale)
+
+		rotated_points = rotation_matrix.dot(points)
+		rotated_horizontal = rotation_matrix.dot(horizontal)
+		rotated_vertical = rotation_matrix.dot(vertical)
+
+		# Figure
+		plt.figure(figsize=[10, 10])
+
+		# Original Image
+		plt.plot(points[0], points[1], 'b', linewidth=5)
+
+		# Rotated Image
+		plt.plot(rotated_points[0], rotated_points[1], 'g', linewidth=5)
+
+		# Original Image - Additional Drawings
+		plt.plot(points[0], points[1], 'b', marker='o', markersize=10)
+		plt.plot([center[0]], [center[1]], 'k', marker='o', markersize=10)
+		plt.plot(horizontal[0], horizontal[1], 'b--', linewidth=2)
+		plt.plot(vertical[0], vertical[1], 'b--', linewidth=2)
+
+		# Roatated Image - Additional Drawings
+		plt.plot(rotated_points[0], rotated_points[1], 'g', marker='o', markersize=10)
+		plt.plot([center[0]], [center[1]], 'k', marker='o', markersize=10)
+		plt.plot(rotated_horizontal[0], rotated_horizontal[1], 'g--', linewidth=2)
+		plt.plot(rotated_vertical[0], rotated_vertical[1], 'g--', linewidth=2)
+
+		# Figure parameters
+		plt.xlim(center[0] - displ, center[1] + displ)
+		plt.ylim(center[0] - displ, center[1] + displ)
+		plt.xlabel("X-axis", fontsize=15)
+		plt.ylabel("Y-axis", fontsize=15)
+		plt.title("Rotation Example", fontsize=20)
+		plt.legend(["Original", "Rotated"])
+		plt.grid(True)
+		plt.show()
+
+
+	if TEST_WITH_OPENCV_ROTATION_MATRIX_2D:
+
 		# Example 1
-		interpolation = InterpolationFlags.INTER_NEAREST
-		output_path = "./data/image005_OpenCV_inter_nearest.jpg"
-		print(rotate_image_cv2(image=img_path,
-							   angle=angle,
-							   interpolation=interpolation,
-							   output_shape=output_shape,
-							   center=center,
-							   scale=scale,
-							   output_path=output_path))
-		print("\n")
+		center = (5, 5)
+		scale = 1.0
+		displacement = 20
+		displ_scale = 0.75
+		angle = 30
+
+		points = np.array([
+			[0, 10, 10,  0, 0],
+			[0,  0, 10, 10, 0]
+		])
+
+		rotataion_matrix_draw(points=points, 
+							  center=center, 
+							  angle=angle, 
+							  scale=scale, 
+							  displ=displacement, 
+							  displ_scale=displ_scale)
 
 		# Example 2
-		interpolation = InterpolationFlags.INTER_LINEAR
-		output_path = "./data/image005_OpenCV_inter_linear.jpg"
-		print(rotate_image_cv2(image=img_path,
-							   angle=angle,
-							   interpolation=interpolation,
-							   output_shape=output_shape,
-							   center=center,
-							   scale=scale,
-							   output_path=output_path))
-		print("\n")
+		center = (5, 5 * cv2.sqrt(3)[0, 0] / 3)
+		scale = 1.0
+		displacement = 20
+		displ_scale = 0.75
+		angle = 180
+
+		points = np.array([
+			[0, 10,                     5, 0],
+			[0,  0, cv2.sqrt(3)[0, 0] * 5, 0]
+		])
+
+		rotataion_matrix_draw(points=points, 
+							  center=center, 
+							  angle=angle, 
+							  scale=scale, 
+							  displ=displacement, 
+							  displ_scale=displ_scale)
 
 		# Example 3
-		interpolation = InterpolationFlags.INTER_CUBIC
-		output_path = "./dataimage005_OpenCV_inter_cubic.jpg"
-		print(rotate_image_cv2(image=img_path,
-							   angle=angle,
-							   interpolation=interpolation,
-							   output_shape=output_shape,
-							   center=center,
-							   scale=scale,
-							   output_path=output_path))
-		print("\n")
+		center = (5, 5 * cv2.sqrt(3)[0, 0] / 3)
+		scale = 2.0
+		displacement = 20
+		displ_scale = 0.75
+		angle = 180
 
-		# Example 4
-		interpolation = InterpolationFlags.INTER_AREA
-		output_path = "./data/image005_OpenCV_inter_area.jpg"
-		print(rotate_image_cv2(image=img_path,
-							   angle=angle,
-							   interpolation=interpolation,
-							   output_shape=output_shape,
-							   center=center,
-							   scale=scale,
-							   output_path=output_path))
-		print("\n")
+		points = np.array([
+			[0, 10,                     5, 0],
+			[0,  0, cv2.sqrt(3)[0, 0] * 5, 0]
+		])
 
-		# Example 5
-		interpolation = InterpolationFlags.INTER_LANCZOS4
-		output_path = "./data/image005_OpenCV_inter_lancz0s4.jpg"
-		print(rotate_image_cv2(image=img_path,
-							   angle=angle,
-							   interpolation=interpolation,
-							   output_shape=output_shape,
-							   center=center,
-							   scale=scale,
-							   output_path=output_path))
-		print("\n")
+		rotataion_matrix_draw(points=points, 
+							  center=center, 
+							  angle=angle, 
+							  scale=scale, 
+							  displ=displacement, 
+							  displ_scale=displ_scale)
 
-		# Example 6
-		interpolation = InterpolationFlags.WARP_FILL_OUTLIERS
-		output_path = "./data.image005_OpenCV_inter_warp_fill.jpg"
-		print(rotate_image_cv2(image=img_path,
-							   angle=angle,
-							   interpolation=interpolation,
-							   output_shape=output_shape,
-							   center=center,
-							   scale=scale,
-							   output_path=output_path))
-		print("\n")
+	#--------------------------------------------------#
+	# Test Warp Affine                                 #
+	#--------------------------------------------------#
+		
+	def warp_affine_draw(points, center, angle, scale, displ, displ_scale):
 
-		# Example 7
-		interpolation = InterpolationFlags.WARP_INVERSE_MAP
-		output_path = "./data/image005_OpenCV_inter_warp_inverse.jpg"
-		print(rotate_image_cv2(image=img_path,
-							   angle=angle,
-							   interpolation=interpolation,
-							   output_shape=output_shape,
-							   center=center,
-							   scale=scale,
-							   output_path=output_path))
-		print("\n")
+		"""
+		Auxiliary function for rotating and drawing object.
 
-		#--------------------------------------------------#
-		# Test Output Shape                                #
-		#--------------------------------------------------#
+		Args:
+			points (np.ndarray): Represent two dimensional object.
+			center (float): Center of the rotation.
+			angle (float): Angle of the rotation.
+			scale (float): Scale factor of the image.
+			displ (float): Displacement parameter for drawing the coordinate
+						   system axis through the center of rotation.
+			displ_scale (float): Parameter for scaling the axes of the new
+								 coordinate system.
 
-		if TEST_WITH_OPENCV_WITH_OUTPUT_SHAPE:
-			
-			# Example 1
+		Returns:
+			-
 
-			# Example 2
+		"""
 
-			# Example 3
+		# points = points.reshape(points.shape[0], points.shape[1], 1)
+		points = points.astype(float)
 
-		#--------------------------------------------------#
-		# Test Rotation Matrix 2D                          #
-		#--------------------------------------------------#
+		horizontal = np.array([
+			[center[0] - displ * displ_scale, center[0] + displ * displ_scale],
+			[center[1], center[1]]
+		])
+		# horizontal = horizontal.reshape(horizontal.shape[0], horizontal.shape[1], 1)
+		horizontal = horizontal.astype(float)
 
-		if TEST_WITH_OPENCV_ROTATION_MATRIX_2D:
-			pass
+		vertical = np.array([
+			[center[0], center[0]],
+			[center[1] - displ * displ_scale, center[1] + displ * displ_scale]
+		])
+		# vertical = vertical.reshape(vertical.shape[0], vertical.shape[1], 1)
+		vertical = vertical.astype(float)
 
-		#--------------------------------------------------#
-		# Test Warp Affine                                 #
-		#--------------------------------------------------#
+		rotation_matrix = cv2.getRotationMatrix2D(center, angle, scale)
+		print("center", center)
+		print("angle", angle)
+		print("scale", scale)
+		print("rotation matrix", rotation_matrix)
 
-		if TEST_WITH_OPENCV_WARP_AFFINE:
-			pass
+		print("points", points)
+		print("points shape", points.shape[1::-1])
+
+		rotated_points = cv2.warpAffine(points, 
+						 				rotation_matrix, 
+						 				points.shape, 
+						 				flags=cv2.INTER_LINEAR)
+		rotated_horizontal = cv2.warpAffine(horizontal, 
+						 					rotation_matrix, 
+						 					horizontal.shape, 
+						 					flags=cv2.INTER_LINEAR)
+		rotated_vertical = cv2.warpAffine(vertical, 
+						 				  rotation_matrix, 
+						 				  vertical.shape, 
+						 				  flags=cv2.INTER_LINEAR)
+
+		# Figure
+		plt.figure(figsize=[10, 10])
+
+		# Original Image
+		plt.plot(points[0], points[1], 'b', linewidth=5)
+
+		# Rotated Image
+		plt.plot(rotated_points[0], rotated_points[1], 'g', linewidth=5)
+
+		# Original Image - Additional Drawings
+		plt.plot(points[0], points[1], 'b', marker='o', markersize=10)
+		plt.plot([center[0]], [center[1]], 'k', marker='o', markersize=10)
+		plt.plot(horizontal[0], horizontal[1], 'b--', linewidth=2)
+		plt.plot(vertical[0], vertical[1], 'b--', linewidth=2)
+
+		# Roatated Image - Additional Drawings
+		plt.plot(rotated_points[0], rotated_points[1], 'g', marker='o', markersize=10)
+		plt.plot([center[0]], [center[1]], 'k', marker='o', markersize=10)
+		plt.plot(rotated_horizontal[0], rotated_horizontal[1], 'g--', linewidth=2)
+		plt.plot(rotated_vertical[0], rotated_vertical[1], 'g--', linewidth=2)
+
+		# Figure parameters
+		plt.xlim(center[0] - displ, center[1] + displ)
+		plt.ylim(center[0] - displ, center[1] + displ)
+		plt.xlabel("X-axis", fontsize=15)
+		plt.ylabel("Y-axis", fontsize=15)
+		plt.title("Rotation Example", fontsize=20)
+		plt.legend(["Original", "Rotated"])
+		plt.grid(True)
+		plt.show()
+
+	if TEST_WITH_OPENCV_WARP_AFFINE:
+
+		# Example 1
+		center = (5, 5)
+		scale = 1.0
+		displacement = 20
+		displ_scale = 0.75
+		angle = 30
+
+		points = np.array([
+			[0, 10, 10,  0, 0],
+			[0,  0, 10, 10, 0]
+		])
+
+		warp_affine_draw(points=points, 
+						 center=center,
+						 angle=angle, 
+						 scale=scale, 
+						 displ=displacement, 
+						 displ_scale=displ_scale)
+
+		# Example 2
+		center = (5, 5 * cv2.sqrt(3)[0, 0] / 3)
+		scale = 1.0
+		displacement = 20
+		displ_scale = 0.75
+		angle = 180
+
+		points = np.array([
+			[0, 10,                     5, 0],
+			[0,  0, cv2.sqrt(3)[0, 0] * 5, 0]
+		])
+
+		warp_affine_draw(points=points, 
+						 center=center,
+						 angle=angle, 
+						 scale=scale, 
+						 displ=displacement, 
+						 displ_scale=displ_scale)
+
+		# Example 3
+		center = (5, 5 * cv2.sqrt(3)[0, 0] / 3)
+		scale = 2.0
+		displacement = 20
+		displ_scale = 0.75
+		angle = 180
+
+		points = np.array([
+			[0, 10,                     5, 0],
+			[0,  0, cv2.sqrt(3)[0, 0] * 5, 0]
+		])
+
+		warp_affine_draw(points=points, 
+						 center=center,
+						 angle=angle, 
+						 scale=scale, 
+						 displ=displacement, 
+						 displ_scale=displ_scale)
 
 
 if __name__ == "__main__":
