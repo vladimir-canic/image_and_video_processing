@@ -292,10 +292,6 @@ def rotate_image(image, angle):
 	return img_out
 
 
-def rotate_image_2():
-	pass
-
-
 def rotate_image_cv2(image, 
 					 angle, 
 					 interpolation=None, 
@@ -317,7 +313,7 @@ def rotate_image_cv2(image,
 		output_path (str): Destination for preserving rotated image.
 
 	Returns:
-		flag (bool): If image input path.
+		flag (bool): Flag indicates preserving of the image.
 
 	Raises:
 		IOError: If image isn't read successfully.
