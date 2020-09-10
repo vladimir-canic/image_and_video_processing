@@ -172,7 +172,7 @@ def main():
 	# Example 2
 	img = np.array([[232, 67, 155], [23, 74, 198], [247, 85, 112]])
 	img = img.reshape(img.shape[0], img.shape[1], 1)
-	print(pixel_average_naive(img, 4))
+	print(pixel_average_naive(img, 3))
 	print("\n")
 
 	# Example 3	
